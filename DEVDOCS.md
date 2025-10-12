@@ -41,4 +41,26 @@ Whenever you make changes to your Prisma schema file, you also need to update th
 
 Whenever you update your Prisma schema, you will have to update your database schema using either `prisma migrate dev` or `prisma db push`. This will keep your database schema in sync with your Prisma schema. These commands will also run `prisma generate` under the hood to re-generate your Prisma Client.
 
+`prisma migrate reset` in case you want to reset the db.
+
 differences between these 2 commands. [DOCS](https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases/install-prisma-client-typescript-postgresql)
+
+### Cloning for the fist time
+
+```bash
+git clone https://github.com/giuseppe-messi/chatapp.git
+```
+
+For **`/server`**:
+
+```bash
+cd chatapp/server
+
+npm install
+
+npx prisma generate
+```
+
+### Useful links
+
+[auth techniques](https://apidog.com/blog/node-js-express-authentication/)

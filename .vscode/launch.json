@@ -1,0 +1,28 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    /*
+      Debugging the Node/TypeScript /server with tsx.
+
+      This VS Code debug configuration launches a new Node.js process 
+      that runs the server’s app.ts file directly using the local tsx 
+      binary inside server/node_modules, sets the working directory to server 
+      so relative imports and .env variables resolve correctly, skips stepping 
+      into Node internals while debugging, and automatically loads environment 
+      variables from server/.env for use during runtime
+    */
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug /server (tsx)",
+      "runtimeExecutable": "${workspaceFolder}/server/node_modules/.bin/tsx",
+      "args": ["app.ts"],
+      "cwd": "${workspaceFolder}/server",
+      "skipFiles": ["<node_internals>/**"],
+      "envFile": "${workspaceFolder}/server/.env"
+    }
+  ]
+}
