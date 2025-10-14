@@ -1,30 +1,41 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  ErrorBoundary,
+  LoadingSpinner,
+  type FallbackProps
+} from "@react-lab-mono/ui";
+import { lazy, Suspense } from "react";
+import { Layout } from "./Layout";
+import { ErrorPage } from "./pages/ErrorPage/ErrorPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
+const Home = lazy(() => import("./pages/Home/Home"));
+const SignIn = lazy(() => import("./pages/SignIn/SignIn"));
+const NotFound = lazy(() => import("./pages/NotFound/NotFound"));
+
+const ErrorPageFallback = ({ onClearError }: FallbackProps) => (
+  <ErrorPage onClearError={onClearError} />
+);
 
 function App() {
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch("api/users");
-        const json = await res.json();
-        setUsers(json);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
   return (
-    <div>
-      {users.map((user) => (
-        <div key={user.id}>
-          <h2>{user.name}</h2> <br /> <h2>{user.lastName}</h2>
-        </div>
-      ))}
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary fallback={ErrorPageFallback}>
+        <Router>
+          <Suspense fallback={<LoadingSpinner size="lg" />}>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route element={<Home />} index />
+                <Route element={<SignIn />} path="signin" />
+                <Route element={<NotFound />} path="*" />
+              </Route>
+            </Routes>
+          </Suspense>
+        </Router>
+      </ErrorBoundary>
+    </QueryClientProvider>
   );
 }
 
