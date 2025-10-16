@@ -20,17 +20,34 @@
 :root {
   font-family: var(--font-sans);
   font-feature-settings: var(--font-sans--font-feature-settings);
-  /* line-height: 1.5;
-  font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale; */
+  /* colors */
+  --color-primary: #242424;
+  --color-secondary: #468faf;
+  --color-white: #f8f8ff;
+  --color-light-red: #e15151;
+  --color-light-green: #48bb78;
+  --color-light-yellow: #e1c051;
+
+  /* Typography */
+  --font-size-base: 1rem;
+
+  /* Border radius */
+  --app-radius: 6px;
+  --btn-radius: 4px;
+
+  /* breakpoints */
+  --bp-sm: 576px;
+  --bp-md: 768px;
+  --bp-lg: 992px;
+  --bp-xl: 1200px;
 }
 
 /* a {
