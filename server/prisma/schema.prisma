@@ -15,8 +15,18 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(cuid())
+  id        String    @id @default(cuid())
   firstName String
   lastName  String
-  email     String @unique
+  email     String    @unique
+  session   Session[]
+}
+
+model Session {
+  id         String @id @default(cuid())
+  secretHash String @unique // hashed(secret)
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

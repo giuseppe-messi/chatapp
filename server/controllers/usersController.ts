@@ -1,18 +1,14 @@
-import type { DefaultArgs } from "@prisma/client/runtime/binary";
-import { Prisma, type PrismaClient } from "../generated/prisma/index.js";
+import { Prisma } from "../generated/prisma/index.js";
 import type { Express } from "express";
 import * as z from "zod";
-
-type PrismaClientType = PrismaClient<
-  Prisma.PrismaClientOptions,
-  never,
-  DefaultArgs
->;
+import type { PrismaClientType } from "../types/prisma.js";
+import { createSession, hashed } from "../lib/session.js";
+import { SESSION_TOKEN_COOKIE } from "../lib/shared.js";
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 20;
 
-const UserQuery = z.object({
+const GetUsersQuery = z.object({
   filterByName: z.string().optional(),
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce
@@ -24,9 +20,19 @@ const UserQuery = z.object({
   // sortBy: z.enum(['firstName'])
 });
 
+const CreateUser = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.email()
+});
+
+const VerifyUser = z.object({
+  email: z.email()
+});
+
 export const usersController = (app: Express, prisma: PrismaClientType) => {
   app.get("/users", async (req, res) => {
-    const parsed = UserQuery.safeParse(req.query);
+    const parsed = GetUsersQuery.safeParse(req.query);
 
     if (!parsed.success)
       return res.status(400).json({ error: "Invalid params!" });
@@ -66,19 +72,22 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
   });
 
   app.post("/users", async (req, res) => {
+    console.log(req.body);
+    const parsed = CreateUser.safeParse(req.body);
+
+    if (!parsed.success)
+      return res.status(400).json({ error: "Invalid params!" });
+
     const { firstName, lastName, email } = req.body;
 
-    if (!firstName || !lastName || !email)
-      res.status(400).json({ error: "Bad request!" });
-
-    const doesExist = await prisma.user.findUnique({ where: { email } });
-
-    if (doesExist)
-      res
-        .status(409)
-        .json({ error: "This email already exists! Try logging in!" });
-
     try {
+      const doesExist = await prisma.user.findUnique({ where: { email } });
+
+      if (doesExist)
+        res
+          .status(409)
+          .json({ message: "This email already exists! Try logging in!" });
+
       const user = await prisma.user.create({
         data: {
           firstName,
@@ -115,6 +124,80 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
       res.status(204).end();
     } catch (err) {
       res.status(500).json({ error: err });
+    }
+  });
+
+  app.post("/user/signin", async (req, res) => {
+    const parsed = VerifyUser.safeParse(req.body);
+
+    if (!parsed.success)
+      return res.status(400).json({ message: "Invalid params!" });
+
+    const { email } = parsed.data;
+
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          email
+        }
+      });
+
+      if (!user)
+        return res
+          .status(409)
+          .json({ message: "This email does not exists! Try registering!" });
+
+      const { token } = await createSession(user, prisma);
+
+      return res
+        .status(200)
+        .cookie(SESSION_TOKEN_COOKIE, token, {
+          httpOnly: true,
+          path: "/"
+        })
+        .json({
+          ...user
+        });
+    } catch (err) {
+      if (err) res.status(500).json({ message: "Something went wrong!" });
+    }
+  });
+
+  app.post("/user/signout", async (req, res) => {
+    const sessionCookie = req.cookies[SESSION_TOKEN_COOKIE];
+
+    if (!sessionCookie)
+      return res.status(401).json({ message: "No user logged in!" });
+
+    try {
+      const secretHash = hashed(sessionCookie);
+
+      console.log("secretHash: ", secretHash);
+
+      const currentSession = await prisma.session.findUnique({
+        where: {
+          secretHash
+        }
+      });
+
+      if (!currentSession)
+        return res.status(401).json({ message: "No session found!" });
+
+      await prisma.session.deleteMany({
+        where: {
+          secretHash
+        }
+      });
+
+      return res
+        .status(200)
+        .clearCookie(SESSION_TOKEN_COOKIE, {
+          httpOnly: true,
+          path: "/"
+        })
+        .end();
+    } catch (err) {
+      if (err) res.status(500).json({ error: "Something went wrong!" });
     }
   });
 };
