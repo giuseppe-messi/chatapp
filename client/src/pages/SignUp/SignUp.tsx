@@ -1,15 +1,16 @@
 import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useMutationUsers } from "../../domains/users/useMutationUserSignIn";
 import { useToastersStore } from "@react-lab-mono/ui";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
+import { useUserSignUpMutation } from "../../domains/users/actions";
+import { APP_ROUTES } from "../../App";
 
 export const SignUp = () => {
   const formRef = useRef<HTMLFormElement | null>(null);
   const navigate = useNavigate();
-  const setUser = useAuth()?.setUser;
-  const mutation = useMutationUsers();
+  const { setUser } = useAuth();
+  const mutation = useUserSignUpMutation();
   const { enQueueToast } = useToastersStore();
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -28,10 +29,8 @@ export const SignUp = () => {
     mutation.mutate(formData, {
       onSuccess: (data) => {
         enQueueToast("sucess", "Successfully registered!");
-        const user = data.items[0];
-        console.log("user: ", user);
-        setUser?.(user);
-        navigate("/");
+        setUser(data);
+        navigate(APP_ROUTES.home);
       },
       onError: (err) => {
         let errorMessage = "Registration failed!";

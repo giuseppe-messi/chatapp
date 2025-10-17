@@ -12,7 +12,8 @@ const getSession = async () => {
 export const useQuerySession = () => {
   const query = useQuery({
     queryKey: sessionKeys.key,
-    queryFn: getSession
+    queryFn: getSession,
+    retry: false
   });
 
   return {

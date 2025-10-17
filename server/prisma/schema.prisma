@@ -19,6 +19,8 @@ model User {
   firstName String
   lastName  String
   email     String    @unique
+  avatar    String
+  avatarBG  String
   session   Session[]
 }
 

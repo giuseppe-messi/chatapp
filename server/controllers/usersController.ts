@@ -4,6 +4,7 @@ import * as z from "zod";
 import type { PrismaClientType } from "../types/prisma.js";
 import { createSession, hashed } from "../lib/session.js";
 import { SESSION_TOKEN_COOKIE } from "../lib/shared.js";
+import { getRandomAvatarColor } from "../lib/getRandomAvatarColor.js";
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 20;
@@ -39,18 +40,43 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
 
     const { filterByName, page, pageSize } = parsed.data;
 
-    const where: Prisma.UserWhereInput = filterByName
-      ? {
-          firstName: {
-            contains: filterByName,
-            mode: "insensitive"
-          }
-        }
-      : {};
-    const skip = (page - 1) * pageSize;
-    const take = pageSize;
+    const sessionCookie = req.cookies[SESSION_TOKEN_COOKIE];
+
+    if (!sessionCookie)
+      return res.status(401).json({ message: "No user logged in!" });
 
     try {
+      const secretHash = hashed(sessionCookie);
+
+      const currentSession = await prisma.session.findUnique({
+        where: {
+          secretHash
+        }
+      });
+
+      if (!currentSession)
+        return res.status(401).json({ message: "No session found!" });
+
+      const currentUserId = currentSession.userId;
+
+      const baseWhere = {
+        NOT: {
+          id: currentUserId
+        }
+      };
+
+      const where: Prisma.UserWhereInput = filterByName
+        ? {
+            ...baseWhere,
+            firstName: {
+              contains: filterByName,
+              mode: "insensitive"
+            }
+          }
+        : baseWhere;
+      const skip = (page - 1) * pageSize;
+      const take = pageSize;
+
       const [items, total] = await prisma.$transaction([
         prisma.user.findMany({
           where,
@@ -72,7 +98,6 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
   });
 
   app.post("/users", async (req, res) => {
-    console.log(req.body);
     const parsed = CreateUser.safeParse(req.body);
 
     if (!parsed.success)
@@ -88,17 +113,29 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
           .status(409)
           .json({ message: "This email already exists! Try logging in!" });
 
+      const avatarBG = getRandomAvatarColor() ?? "#008000c7";
+      const avatar = firstName.charAt(0);
+
       const user = await prisma.user.create({
         data: {
           firstName,
           lastName,
-          email
+          email,
+          avatarBG,
+          avatar
         }
       });
+      const { token } = await createSession(user, prisma);
 
-      res.status(201).json({
-        ...user
-      });
+      return res
+        .status(201)
+        .cookie(SESSION_TOKEN_COOKIE, token, {
+          httpOnly: true,
+          path: "/"
+        })
+        .json({
+          ...user
+        });
     } catch (err) {
       // if (err instanceof Prisma.PrismaClientKnownRequestError) {
       //   // have a bunch of these condition following
@@ -171,8 +208,6 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
 
     try {
       const secretHash = hashed(sessionCookie);
-
-      console.log("secretHash: ", secretHash);
 
       const currentSession = await prisma.session.findUnique({
         where: {

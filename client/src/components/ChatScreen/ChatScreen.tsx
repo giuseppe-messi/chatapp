@@ -16,9 +16,9 @@ export const ChatScreen = () => {
 
   return (
     <main className="flex-1 flex flex-col justify-between bg-white p-4 rounded-sm rounded-tl-none rounded-bl-none">
-      <div>
+      {/* <div>
         Name: <h2>{chattingWithUserId}</h2>
-      </div>
+      </div> */}
 
       <div className="h-[64vh] overflow-y-auto my-4">
         <div className="min-h-full flex flex-1 flex-col justify-end gap-3 bg-[#00000008] p-[14px] border border-[#00000017] rounded-[4px]">

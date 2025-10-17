@@ -1,14 +1,14 @@
 import { Search } from "../Search/Search";
-import { useQueryUsers } from "../../domains/users/useQueryUsers";
 import { useState } from "react";
 import { useDebouncedValue } from "../../helpers/useDebouncedValue";
 import { UserList } from "../UserList/UserList";
+import { useUsersQuery } from "../../domains/users/actions";
 
 export const UsersList = () => {
   const [query, setQuery] = useState("");
   const handleQuery = (query: string) => setQuery(query);
 
-  const { error, users, isFetching } = useQueryUsers({
+  const { error, users, isFetching } = useUsersQuery({
     queryStr: useDebouncedValue(query)
   });
 

@@ -5,7 +5,7 @@ import { LoadingSpinner } from "@react-lab-mono/ui";
 import { APP_ROUTES } from "./App";
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { user, isLoadingUser } = useAuth() ?? {};
+  const { user, isLoadingUser } = useAuth();
   const location = useLocation();
 
   if (isLoadingUser) return <LoadingSpinner size="lg" color="white" />;
