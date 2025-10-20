@@ -8,10 +8,9 @@ type UserListItemProps = {
 };
 
 export const UserListItem = ({ user }: UserListItemProps) => {
-  console.log("🚀 ~ user:", user.avatarBG);
+  const { chatWithUserId, setChatWithUserId } = useChat();
 
-  const { chattingWithUserId, setChattingWithUserId } = useChat();
-  const isActive = chattingWithUserId === user.id;
+  const isActive = chatWithUserId === user.id;
 
   return (
     <li
@@ -19,10 +18,19 @@ export const UserListItem = ({ user }: UserListItemProps) => {
         "group border-b border-gray-300",
         isActive ? "bg-indigo-400" : "hover:bg-gray-200"
       )}
-      onClick={() => setChattingWithUserId(user.id)}
+      onClick={() => setChatWithUserId(user.id)}
     >
       <div className="flex items-center justify-around p-2">
-        <Avatar background={user.avatarBG} letter={user.avatar} />
+        <div className="flex">
+          <Avatar background={user.avatarBG} letter={user.avatar} />
+
+          <div
+            className={clsx(
+              "w-2 h-2 rounded-full",
+              true ? "bg-green-600" : "bg-gray-400"
+            )}
+          />
+        </div>
 
         <div className="flex-1 justify-center text-center">
           <p

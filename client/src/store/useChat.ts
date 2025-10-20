@@ -1,11 +1,12 @@
 import { create } from "zustand";
 
 type useChatProps = {
-  chattingWithUserId: string | null;
-  setChattingWithUserId: (userId: string) => void;
+  chatWithUserId: string | null;
+  setChatWithUserId: (userId: string) => void;
 };
 
-export const useChat = create<useChatProps>((set) => ({
-  chattingWithUserId: null,
-  setChattingWithUserId: (userId) => set({ chattingWithUserId: userId })
+export const useChat = create<useChatProps>((set, get) => ({
+  chatWithUserId: null,
+  connectedUsersIds: [],
+  setChatWithUserId: (userId) => set({ chatWithUserId: userId })
 }));

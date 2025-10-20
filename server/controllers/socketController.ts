@@ -1,7 +1,41 @@
 import { Server } from "socket.io";
 import type { Server as HttpServer } from "node:http";
+import { randomUUID } from "node:crypto";
+import type { PrismaClient } from "@prisma/client/extension";
 
-export const socketController = (server: HttpServer) => {
+const dmRoomId = (userIdA: string, userIdB: string) =>
+  ["dm", ...[userIdA, userIdB].sort()].join("::");
+
+const dmUserInfoCache = new Map();
+
+console.log("🚀 ~ dmUserInfoCache:", dmUserInfoCache);
+
+const getUserInfoForDm = async (userId: string, prisma: PrismaClient) => {
+  const cached = dmUserInfoCache.get(userId);
+
+  if (cached) return cached;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId
+    }
+  });
+
+  if (!user) return;
+
+  const userInfo = {
+    userId: user.id,
+    name: user.firstName,
+    avatar: user.avatar,
+    avatarBG: user.avatarBG
+  };
+
+  dmUserInfoCache.set(userId, userInfo);
+
+  return userInfo;
+};
+
+export const socketController = (server: HttpServer, prisma: PrismaClient) => {
   const io = new Server(server, {
     cors: {
       origin: ["http://localhost:5173"]
@@ -11,31 +45,58 @@ export const socketController = (server: HttpServer) => {
   io.on("connection", (socket) => {
     console.log("a user connected");
 
-    const userId = socket.handshake.auth.userId; // get this from a real auth token in production
-    console.log("userId: ", userId);
+    // auth user here properly later, but for now
+    const userId = socket.handshake.auth?.userId;
+    if (!userId) {
+      socket.disconnect(true);
+      return;
+    }
 
-    socket.join(`user:${userId}`);
+    // broadcast online users here
 
-    socket.on("dm:send", async ({ toUserId, text, threadId }) => {
-      // 1) persist to DB
-      // const msg = await saveMessage({
-      //   from: userId,
-      //   to: toUserId,
-      //   threadId,
-      //   text
-      // });
-
-      console.log("text: ", text);
-
-      // 2) deliver to recipient on all devices
-      io.to(`user:${toUserId}`).emit("dm:new", text);
-
-      // 3) echo back to sender so their UI updates immediately
-      io.to(`user:${userId}`).emit("dm:sent", text);
+    socket.on("dm:join", ({ peerId }: { peerId: string }) => {
+      const room = dmRoomId(userId, peerId);
+      socket.join(room);
+      console.log("joined room!");
     });
-  });
 
-  io.on("disconnect", (socket) => {
-    console.log("a user disconnected");
+    socket.on("dm:leave", ({ peerId }: { peerId: string }) => {
+      const room = dmRoomId(userId, peerId);
+      socket.leave(room);
+      console.log("left room!");
+    });
+
+    socket.on(
+      "dm:send",
+      async (
+        { to, text }: { to: string; text: string },
+        ack?: (res: { ok: boolean; msg?: any; error?: string }) => void
+      ) => {
+        try {
+          const room = dmRoomId(userId, to);
+
+          // persist to DB here if you want
+          const msg = {
+            id: randomUUID(),
+            room,
+            from: await getUserInfoForDm(userId, prisma),
+            to: await getUserInfoForDm(to, prisma),
+            text,
+            createdAt: Date.now()
+          };
+
+          // Emit to the shared DM room so both sides receive the same event
+          io.to(room).emit("dm:message", msg);
+
+          ack?.({ ok: true, msg });
+        } catch (e: any) {
+          ack?.({ ok: false, error: e?.message ?? "send failed" });
+        }
+      }
+    );
+
+    socket.on("disconnect", (socket) => {
+      console.log("a user disconnected");
+    });
   });
 };
