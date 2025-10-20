@@ -22,7 +22,7 @@ const prisma = new PrismaClient();
 
 usersController(app, prisma);
 sessionController(app, prisma);
-// socketController(server);
+socketController(server);
 
 server.listen(port, () => {
   console.log(`Listening on port: ${port}`);

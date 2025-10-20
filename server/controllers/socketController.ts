@@ -11,14 +11,31 @@ export const socketController = (server: HttpServer) => {
   io.on("connection", (socket) => {
     console.log("a user connected");
 
-    socket.on("join_room", (room) => {
-      console.log(":::::: ", room);
-      socket.join("room1");
-      console.log(`Socket ${socket.id} joined room1`);
-    });
+    const userId = socket.handshake.auth.userId; // get this from a real auth token in production
+    console.log("userId: ", userId);
 
-    socket.on("send_message", (msg) => {
-      console.log("message: " + msg.message);
+    socket.join(`user:${userId}`);
+
+    socket.on("dm:send", async ({ toUserId, text, threadId }) => {
+      // 1) persist to DB
+      // const msg = await saveMessage({
+      //   from: userId,
+      //   to: toUserId,
+      //   threadId,
+      //   text
+      // });
+
+      console.log("text: ", text);
+
+      // 2) deliver to recipient on all devices
+      io.to(`user:${toUserId}`).emit("dm:new", text);
+
+      // 3) echo back to sender so their UI updates immediately
+      io.to(`user:${userId}`).emit("dm:sent", text);
     });
+  });
+
+  io.on("disconnect", (socket) => {
+    console.log("a user disconnected");
   });
 };

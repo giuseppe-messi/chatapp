@@ -1,41 +1,54 @@
 import { useState, useEffect } from "react";
-// import { socket } from "../../socket";
+// import { ConnectionState } from './components/ConnectionState';
+// import { ConnectionManager } from './components/ConnectionManager';
+// import { Events } from "./components/Events";
+// import { MyForm } from './components/MyForm';
+import { socket } from "../../socket";
 import { ChatScreen } from "../ChatScreen/ChatScreen";
 
 export const SocketWrapper = () => {
-  // const [isConnected, setIsConnected] = useState(socket.connected);
-  // const [fooEvents, setFooEvents] = useState([]);
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [fooEvents, setFooEvents] = useState([]);
 
-  // console.log("isConnected: ", isConnected);
+  useEffect(() => {
+    const onConnect = () => {
+      setIsConnected(true);
+    };
 
-  // useEffect(() => {
-  //   const onConnect = () => {
-  //     socket.emit("join_room", "room1");
-  //     socket.emit("send_message", {
-  //       room: "room1",
-  //       message: "Hello from React!"
-  //     });
-  //     setIsConnected(true);
-  //   };
-  //   const onDisconnect = () => setIsConnected(false);
-  //   const onFooEvent = (value) =>
-  //     setFooEvents((previous) => [...previous, value]);
+    const onDisconnect = () => {
+      setIsConnected(false);
+    };
 
-  //   socket.on("connect", onConnect);
-  //   socket.on("disconnect", onDisconnect);
-  //   socket.on("foo", onFooEvent);
+    const onFooEvent = (value) => {
+      setFooEvents((previous) => [...previous, value]);
+    };
 
-  //   onConnect();
+    socket.auth = { userId: "test" };
+    socket.connect();
 
-  //   return () => {
-  //     socket.off("connect", onConnect);
-  //     socket.off("disconnect", onDisconnect);
-  //     socket.off("foo", onFooEvent);
-  //   };
-  // }, []);
+    socket.emit("dm:send", { text: "questo messaggio" });
+
+    // socket.on("dm:new", (msg) => addIncoming(msg));
+    // socket.on("dm:sent", (msg) => updateLocal(msg));
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("foo", onFooEvent);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("foo", onFooEvent);
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <>
+      {/* <ConnectionState isConnected={ isConnected } />
+      <Events events={ fooEvents } />
+      <ConnectionManager />
+      <MyForm /> */}
       <ChatScreen />
     </>
   );
