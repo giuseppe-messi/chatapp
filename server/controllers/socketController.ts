@@ -54,11 +54,21 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
 
     // broadcast online users here
 
-    socket.on("dm:join", ({ peerId }: { peerId: string }) => {
-      const room = dmRoomId(userId, peerId);
-      socket.join(room);
-      console.log("joined room!");
-    });
+    socket.on(
+      "dm:join",
+      (peerId: string, ack?: (room: string) => void, last: string) => {
+        console.log("🚀 ~ last:", last);
+
+        const room = dmRoomId(userId, peerId);
+        socket.join(room);
+
+        ack?.(room);
+
+        // socket.emit("dm:joined", { room });
+
+        console.log("joined room!");
+      }
+    );
 
     socket.on("dm:leave", ({ peerId }: { peerId: string }) => {
       const room = dmRoomId(userId, peerId);
@@ -68,10 +78,15 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
 
     socket.on(
       "dm:send",
-      async (
-        { to, text }: { to: string; text: string },
-        ack?: (res: { ok: boolean; msg?: any; error?: string }) => void
-      ) => {
+      async ({
+        to,
+        text,
+        ack
+      }: {
+        to: string;
+        text: string;
+        ack?: (res: { ok: boolean; msg?: any; error?: string }) => void;
+      }) => {
         try {
           const room = dmRoomId(userId, to);
 
@@ -85,7 +100,8 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
             createdAt: Date.now()
           };
 
-          // Emit to the shared DM room so both sides receive the same event
+          // Emit to the shared DM room
+          // both sides receive the same event
           io.to(room).emit("dm:message", msg);
 
           ack?.({ ok: true, msg });

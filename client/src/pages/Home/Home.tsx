@@ -1,18 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
 import { SocketWrapper } from "../../components/SocketWrapper/SocketWrapper";
-import { UsersList } from "../../components/UsersList/UsersList";
+// import { UsersList } from "../../components/UsersList/UsersList";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUserSignOutMutation } from "../../domains/users/actions";
 import { APP_ROUTES } from "../../App";
-import { useChat } from "../../store/useChat";
+// import { useChat } from "../../store/useChat";
 
 const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const mutation = useUserSignOutMutation();
-  const { chatWithUserId } = useChat();
+  // const { chatWithUserId } = useChat();
 
-  console.log("🚀 ~ chatWithUserId:", chatWithUserId);
+  // console.log("🚀 ~ chatWithUserId:", chatWithUserId);
 
   const handleSignout = async () => {
     mutation.mutate(undefined, {
@@ -40,7 +40,9 @@ const Home = () => {
         </h1>
       </header>
 
-      <div className="flex flex-1 mt-4 p-2">
+      <SocketWrapper />
+
+      {/* <div className="flex flex-1 mt-4 p-2">
         <UsersList />
         <main className="flex-1 flex flex-col justify-between bg-white p-4 rounded-sm rounded-tl-none rounded-bl-none">
           {chatWithUserId ? (
@@ -49,7 +51,7 @@ const Home = () => {
             <p>Select someone to chat with!</p>
           )}
         </main>
-      </div>
+      </div> */}
     </>
   );
 };

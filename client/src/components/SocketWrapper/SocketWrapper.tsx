@@ -7,6 +7,10 @@ import { ChatScreen } from "../ChatScreen/ChatScreen";
 import type { User } from "../../domains/users/types";
 import { makeSocket } from "../../socket";
 import { useToastersStore } from "@react-lab-mono/ui";
+import { useMessages } from "../../store/useMessages";
+import { useChat } from "../../store/useChat";
+import { UsersList } from "../UsersList/UsersList";
+import { useAuth } from "../../contexts/AuthContext";
 
 type UsereInfoForDm = {
   userId: string;
@@ -24,29 +28,35 @@ export type Message = {
   createdAt: number;
 };
 
-type SocketWrapperProps = {
-  currentUser: User | undefined;
-  chatWithUserId: string;
-};
+export const SocketWrapper = () => {
+  const { user } = useAuth();
+  const { chatWithUserId } = useChat();
 
-export const SocketWrapper = ({
-  currentUser,
-  chatWithUserId
-}: SocketWrapperProps) => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { messages, setMessages } = useMessages();
+  const [isOnline, setIsOnline] = useState(false);
+
+  console.log("🚀 ~ isOnline:", isOnline);
+
+  const [room, setRoom] = useState<string | null>(null);
+
+  console.log("🚀 ~ room:", room);
+
+  const messageSlice = room && messages[room] ? messages[room] : [];
+
+  console.log("🚀 ~ messageSlice:", messageSlice);
+
   const socketRef = useRef<ReturnType<typeof makeSocket> | null>(null);
   const { enQueueToast } = useToastersStore();
 
   // Create the socket only when we have a user
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!user?.id) return;
 
-    const sock = makeSocket(currentUser.id);
+    const sock = makeSocket(user.id);
     socketRef.current = sock;
 
-    const onConnect = () => setIsConnected(true);
-    const onDisconnect = () => setIsConnected(false);
+    const onConnect = () => setIsOnline(true);
+    const onDisconnect = () => setIsOnline(false);
 
     sock.on("connect", onConnect);
     sock.on("disconnect", onDisconnect);
@@ -56,20 +66,37 @@ export const SocketWrapper = ({
     return () => {
       sock.off("connect", onConnect);
       sock.off("disconnect", onDisconnect);
+      sock.off("joined-room", () => setRoom(null));
       sock.removeAllListeners(); // defensive, avoids ghost listeners
       sock.disconnect();
       socketRef.current = null;
     };
-  }, [currentUser?.id]);
+  }, [user?.id]);
 
   // Join or leave the DM room when the peer changes
   useEffect(() => {
     const sockRef = socketRef.current;
-    if (!sockRef || !currentUser?.id || !chatWithUserId) return;
+    if (!sockRef || !user?.id || !chatWithUserId) return;
 
-    sockRef.emit("dm:join", { peerId: chatWithUserId });
+    sockRef.emit(
+      "dm:join",
+      chatWithUserId,
+      (data: string) => {
+        console.log("data: ", data);
+      },
+      "this is a test"
+    );
 
-    const onMessage = (msg: Message) => setMessages((prev) => [...prev, msg]);
+    // sockRef.on("dm:joined", ({ room }: { room: string }) => {
+    //   setRoom(room);
+    // });
+
+    const onMessage = (msg: Message) => {
+      console.log("🚀 ~ msg:", msg);
+
+      setMessages(msg, msg.room);
+      // setMessages((prev) => [...prev, msg]);
+    };
 
     sockRef.on("dm:message", onMessage);
 
@@ -77,7 +104,7 @@ export const SocketWrapper = ({
       sockRef.off("dm:message", onMessage);
       sockRef.emit("dm:leave", { peerId: chatWithUserId });
     };
-  }, [currentUser?.id, chatWithUserId]);
+  }, [user?.id, chatWithUserId]);
 
   const send = (text: string) => {
     const sockRef = socketRef.current;
@@ -97,7 +124,17 @@ export const SocketWrapper = ({
       {/* <ConnectionState isConnected={ isConnected } />
       <ConnectionManager />
       <MyForm /> */}
-      <ChatScreen messages={messages} onSend={send} />
+
+      <div className="flex flex-1 mt-4 p-2">
+        <UsersList />
+        <main className="flex-1 flex flex-col justify-between bg-white p-4 rounded-sm rounded-tl-none rounded-bl-none">
+          {chatWithUserId ? (
+            <ChatScreen messages={messageSlice} onSend={send} />
+          ) : (
+            <p>Select someone to chat with!</p>
+          )}
+        </main>
+      </div>
     </>
   );
 };
