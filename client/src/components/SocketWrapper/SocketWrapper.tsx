@@ -31,44 +31,33 @@ export type Message = {
 export const SocketWrapper = () => {
   const { user } = useAuth();
   const { chatWithUserId } = useChat();
-
   const { messages, setMessages } = useMessages();
   const [isOnline, setIsOnline] = useState(false);
-
-  console.log("🚀 ~ isOnline:", isOnline);
-
   const [room, setRoom] = useState<string | null>(null);
-
-  console.log("🚀 ~ room:", room);
-
-  const messageSlice = room && messages[room] ? messages[room] : [];
-
-  console.log("🚀 ~ messageSlice:", messageSlice);
-
-  const socketRef = useRef<ReturnType<typeof makeSocket> | null>(null);
   const { enQueueToast } = useToastersStore();
+  const messageSlice = room && messages[room] ? messages[room] : [];
+  const socketRef = useRef<ReturnType<typeof makeSocket> | null>(null);
 
   // Create the socket only when we have a user
   useEffect(() => {
     if (!user?.id) return;
 
-    const sock = makeSocket(user.id);
-    socketRef.current = sock;
+    const newSocket = makeSocket(user.id);
+    socketRef.current = newSocket;
 
     const onConnect = () => setIsOnline(true);
     const onDisconnect = () => setIsOnline(false);
 
-    sock.on("connect", onConnect);
-    sock.on("disconnect", onDisconnect);
-
-    sock.connect();
+    newSocket.on("connect", onConnect);
+    newSocket.on("disconnect", onDisconnect);
+    newSocket.connect();
 
     return () => {
-      sock.off("connect", onConnect);
-      sock.off("disconnect", onDisconnect);
-      sock.off("joined-room", () => setRoom(null));
-      sock.removeAllListeners(); // defensive, avoids ghost listeners
-      sock.disconnect();
+      newSocket.off("connect", onConnect);
+      newSocket.off("disconnect", onDisconnect);
+      newSocket.off("joined-room", () => setRoom(null));
+      newSocket.removeAllListeners(); // defensive, avoids ghost listeners
+      newSocket.disconnect();
       socketRef.current = null;
     };
   }, [user?.id]);

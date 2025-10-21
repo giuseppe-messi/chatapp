@@ -54,21 +54,16 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
 
     // broadcast online users here
 
-    socket.on(
-      "dm:join",
-      (peerId: string, ack?: (room: string) => void, last: string) => {
-        console.log("🚀 ~ last:", last);
+    socket.on("dm:join", (peerId: string, ack?: (room: string) => void) => {
+      const room = dmRoomId(userId, peerId);
+      socket.join(room);
 
-        const room = dmRoomId(userId, peerId);
-        socket.join(room);
+      ack?.(room);
 
-        ack?.(room);
+      // socket.emit("dm:joined", { room });
 
-        // socket.emit("dm:joined", { room });
-
-        console.log("joined room!");
-      }
-    );
+      console.log("joined room!");
+    });
 
     socket.on("dm:leave", ({ peerId }: { peerId: string }) => {
       const room = dmRoomId(userId, peerId);
