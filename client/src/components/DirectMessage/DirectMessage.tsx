@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { Avatar } from "../Avatar/Avatar";
-import type { Message } from "../SocketWrapper/SocketWrapper";
+import type { Message } from "../../store/useMessages";
 
 type MessageProps = {
   message: Message;

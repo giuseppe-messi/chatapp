@@ -6,12 +6,13 @@ import type { PrismaClient } from "@prisma/client/extension";
 const dmRoomId = (userIdA: string, userIdB: string) =>
   ["dm", ...[userIdA, userIdB].sort()].join("::");
 
-const dmUserInfoCache = new Map();
+const userInfoForMessageCache = new Map();
+const onlineUsersIds: Set<string> = new Set();
 
-console.log("🚀 ~ dmUserInfoCache:", dmUserInfoCache);
+console.log("🚀 ~ userInfoForMessageCache:", userInfoForMessageCache);
 
 const getUserInfoForDm = async (userId: string, prisma: PrismaClient) => {
-  const cached = dmUserInfoCache.get(userId);
+  const cached = userInfoForMessageCache.get(userId);
 
   if (cached) return cached;
 
@@ -30,7 +31,7 @@ const getUserInfoForDm = async (userId: string, prisma: PrismaClient) => {
     avatarBG: user.avatarBG
   };
 
-  dmUserInfoCache.set(userId, userInfo);
+  userInfoForMessageCache.set(userId, userInfo);
 
   return userInfo;
 };
@@ -52,20 +53,19 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
       return;
     }
 
+    onlineUsersIds.add(userId);
+    io.emit("online-users", [...onlineUsersIds]);
+
     // broadcast online users here
 
     socket.on("dm:join", (peerId: string, ack?: (room: string) => void) => {
       const room = dmRoomId(userId, peerId);
       socket.join(room);
-
       ack?.(room);
-
-      // socket.emit("dm:joined", { room });
-
       console.log("joined room!");
     });
 
-    socket.on("dm:leave", ({ peerId }: { peerId: string }) => {
+    socket.on("dm:leave", (peerId: string) => {
       const room = dmRoomId(userId, peerId);
       socket.leave(room);
       console.log("left room!");
@@ -73,15 +73,11 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
 
     socket.on(
       "dm:send",
-      async ({
-        to,
-        text,
-        ack
-      }: {
-        to: string;
-        text: string;
-        ack?: (res: { ok: boolean; msg?: any; error?: string }) => void;
-      }) => {
+      async (
+        to: string,
+        text: string,
+        ack?: (res: { ok: boolean; msg?: any; error?: string }) => void
+      ) => {
         try {
           const room = dmRoomId(userId, to);
 
@@ -95,9 +91,11 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
             createdAt: Date.now()
           };
 
+          console.log("🚀 ~ msg:", msg);
+
           // Emit to the shared DM room
           // both sides receive the same event
-          io.to(room).emit("dm:message", msg);
+          io.emit("dm:message", msg);
 
           ack?.({ ok: true, msg });
         } catch (e: any) {
@@ -106,8 +104,10 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
       }
     );
 
-    socket.on("disconnect", (socket) => {
+    socket.on("disconnect", () => {
       console.log("a user disconnected");
+      onlineUsersIds.delete(userId);
+      io.emit("online-users", [...onlineUsersIds]);
     });
   });
 };

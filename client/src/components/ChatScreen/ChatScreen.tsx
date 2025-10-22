@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
-import type { Message } from "../SocketWrapper/SocketWrapper";
 import { DirectMessage } from "../DirectMessage/DirectMessage";
+import type { Message } from "../../store/useMessages";
 
 type ChatScreenProps = {
   messages: Message[];

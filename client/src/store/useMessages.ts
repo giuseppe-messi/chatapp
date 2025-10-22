@@ -7,7 +7,7 @@ type UserDm = {
   avatarBG: string;
 };
 
-type Message = {
+export type Message = {
   id: string;
   room: string;
   from: UserDm;
