@@ -8,7 +8,7 @@ type UserDm = {
 };
 
 export type Message = {
-  id: string;
+  _id: string;
   room: string;
   from: UserDm;
   to: UserDm;
@@ -18,7 +18,7 @@ export type Message = {
 
 type useMessagesProps = {
   messages: Record<string, Message[]>;
-  setMessages: (msg: Message, room: string) => void;
+  setMessages: (msg: Message | Message[], room: string) => void;
 };
 
 export const useMessages = create<useMessagesProps>((set, get) => ({
@@ -27,7 +27,10 @@ export const useMessages = create<useMessagesProps>((set, get) => ({
     const messageSlice = room in get().messages ? get().messages[room] : [];
 
     set({
-      messages: { ...get().messages, [room]: [...messageSlice, msg] }
+      messages: {
+        ...get().messages,
+        [room]: Array.isArray(msg) ? msg : [...messageSlice, msg]
+      }
     });
   }
 }));

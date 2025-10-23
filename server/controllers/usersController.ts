@@ -173,11 +173,13 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
     const { email } = parsed.data;
 
     try {
+      console.log("🚀 1");
       const user = await prisma.user.findUnique({
         where: {
           email
         }
       });
+      console.log("🚀 2");
 
       if (!user)
         return res

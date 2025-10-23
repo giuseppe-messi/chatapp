@@ -29,7 +29,7 @@ export const ChatScreen = ({ messages, onSend }: ChatScreenProps) => {
       <div className="h-[64vh] overflow-y-auto my-4">
         <div className="min-h-full flex flex-1 flex-col justify-end gap-3 bg-[#00000008] p-[14px] border border-[#00000017] rounded-[4px]">
           {messages.map((message) => (
-            <DirectMessage key={message.id} message={message} />
+            <DirectMessage key={message._id} message={message} />
           ))}
           <span ref={endChatRef} aria-hidden />
         </div>

@@ -35,7 +35,6 @@ export const useSocket = () => {
     return () => {
       newSocket.off("connect", onConnect);
       newSocket.off("disconnect", onDisconnect);
-      newSocket.off("joined-room", () => setRoom(null));
       newSocket.removeAllListeners(); // defensive, avoids ghost listeners
       newSocket.disconnect();
       socketRef.current = null;
@@ -47,7 +46,12 @@ export const useSocket = () => {
     const sockRef = socketRef.current;
     if (!sockRef || !user?.id || !peerId) return;
 
-    sockRef.emit("dm:join", peerId, (room: string) => setRoom(room));
+    sockRef.emit("dm:join", peerId, (room: string, message: any) => {
+      console.log("🚀 ~ message:", message);
+
+      setRoom(room);
+      setMessages(message, room);
+    });
 
     const onMessage = (msg: Message) => setMessages(msg, msg.room);
     sockRef.on("dm:message", onMessage);

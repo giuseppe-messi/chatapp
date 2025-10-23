@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import type { Server as HttpServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client/extension";
+import { getMessages, saveMessage, type MessageDoc } from "../mongo.js";
 
 const dmRoomId = (userIdA: string, userIdB: string) =>
   ["dm", ...[userIdA, userIdB].sort()].join("::");
@@ -57,13 +58,18 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
     io.emit("online-users", [...onlineUsersIds]);
 
     // broadcast online users here
+    socket.on(
+      "dm:join",
+      async (peerId: string, ack?: (room: string, messages: any) => void) => {
+        const room = dmRoomId(userId, peerId);
+        socket.join(room);
+        const messages = await getMessages(room);
 
-    socket.on("dm:join", (peerId: string, ack?: (room: string) => void) => {
-      const room = dmRoomId(userId, peerId);
-      socket.join(room);
-      ack?.(room);
-      console.log("joined room!");
-    });
+        ack?.(room, messages);
+
+        console.log("joined room!");
+      }
+    );
 
     socket.on("dm:leave", (peerId: string) => {
       const room = dmRoomId(userId, peerId);
@@ -81,17 +87,39 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
         try {
           const room = dmRoomId(userId, to);
 
-          // persist to DB here if you want
-          const msg = {
-            id: randomUUID(),
-            room,
-            from: await getUserInfoForDm(userId, prisma),
-            to: await getUserInfoForDm(to, prisma),
-            text,
-            createdAt: Date.now()
-          };
+          const fromDmInfo = await getUserInfoForDm(userId, prisma);
+          const toDmInfo = await getUserInfoForDm(to, prisma);
 
-          console.log("🚀 ~ msg:", msg);
+          if (!fromDmInfo || !toDmInfo) throw new Error("Users not found!");
+
+          // persist to DB
+          const saved = await saveMessage({
+            room,
+            from: userId,
+            to,
+            text,
+            createdAt: new Date()
+          });
+
+          // const convertDbMessageToUiDm = (dbMessage: Required<MessageDoc>) => {
+          //   return {
+          //     id: dbMessage._id.toString() ?? randomUUID(),
+          //     room,
+          //     from: fromDmInfo,
+          //     to: toDmInfo,
+          //     text,
+          //     createdAt: dbMessage.createdAt
+          //   };
+          // };
+
+          const msg = {
+            id: saved._id.toString() ?? randomUUID(),
+            room,
+            from: fromDmInfo,
+            to: toDmInfo,
+            text,
+            createdAt: saved.createdAt
+          };
 
           // Emit to the shared DM room
           // both sides receive the same event

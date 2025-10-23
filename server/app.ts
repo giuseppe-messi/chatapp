@@ -7,6 +7,7 @@ import { createServer } from "node:http";
 import { socketController } from "./controllers/socketController.js";
 import { sessionController } from "./controllers/sessionController.js";
 import cookieParser from "cookie-parser";
+import { initMongo } from "./mongo.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 const prisma = new PrismaClient();
+initMongo(process.env.MONGO_DB_URL || "");
 
 usersController(app, prisma);
 sessionController(app, prisma);
