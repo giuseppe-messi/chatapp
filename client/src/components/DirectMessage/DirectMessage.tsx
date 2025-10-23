@@ -13,7 +13,7 @@ export const DirectMessage = ({ message }: MessageProps) => {
 
   return (
     <div
-      key={message.id}
+      key={message._id}
       className={clsx(
         "border border-[#00000036] p-[10px] rounded-[3px] bg-[#dcdcdca3] gap-4",
         isOwnMessage && "flex flex-col items-end"
@@ -25,7 +25,7 @@ export const DirectMessage = ({ message }: MessageProps) => {
         size="sm"
       />
 
-      <p key={message.id}>{message.text}</p>
+      <p>{message.text}</p>
     </div>
   );
 };

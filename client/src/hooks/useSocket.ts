@@ -47,8 +47,6 @@ export const useSocket = () => {
     if (!sockRef || !user?.id || !peerId) return;
 
     sockRef.emit("dm:join", peerId, (room: string, message: any) => {
-      console.log("🚀 ~ message:", message);
-
       setRoom(room);
       setMessages(message, room);
     });

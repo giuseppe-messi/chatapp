@@ -63,6 +63,8 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
       async (peerId: string, ack?: (room: string, messages: any) => void) => {
         const room = dmRoomId(userId, peerId);
         socket.join(room);
+
+        // probably a way to load bits at time
         const messages = await getMessages(room);
 
         ack?.(room, messages);
@@ -95,37 +97,17 @@ export const socketController = (server: HttpServer, prisma: PrismaClient) => {
           // persist to DB
           const saved = await saveMessage({
             room,
-            from: userId,
-            to,
+            from: fromDmInfo,
+            to: toDmInfo,
             text,
             createdAt: new Date()
           });
 
-          // const convertDbMessageToUiDm = (dbMessage: Required<MessageDoc>) => {
-          //   return {
-          //     id: dbMessage._id.toString() ?? randomUUID(),
-          //     room,
-          //     from: fromDmInfo,
-          //     to: toDmInfo,
-          //     text,
-          //     createdAt: dbMessage.createdAt
-          //   };
-          // };
-
-          const msg = {
-            id: saved._id.toString() ?? randomUUID(),
-            room,
-            from: fromDmInfo,
-            to: toDmInfo,
-            text,
-            createdAt: saved.createdAt
-          };
-
           // Emit to the shared DM room
           // both sides receive the same event
-          io.emit("dm:message", msg);
+          io.emit("dm:message", saved);
 
-          ack?.({ ok: true, msg });
+          ack?.({ ok: true, msg: saved });
         } catch (e: any) {
           ack?.({ ok: false, error: e?.message ?? "send failed" });
         }
