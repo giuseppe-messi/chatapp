@@ -1,16 +1,14 @@
 import { Server } from "socket.io";
 import type { Server as HttpServer } from "node:http";
-import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@prisma/client/extension";
-import { getMessages, saveMessage, type MessageDoc } from "../mongo.js";
+import { getMessages, saveMessage } from "../features/messages/messages.js";
+import { prisma } from "../db/prisma.js";
 
 const dmRoomId = (userIdA: string, userIdB: string) =>
   ["dm", ...[userIdA, userIdB].sort()].join("::");
 
 const userInfoForMessageCache = new Map();
 const onlineUsersIds: Set<string> = new Set();
-
-console.log("🚀 ~ userInfoForMessageCache:", userInfoForMessageCache);
 
 const getUserInfoForDm = async (userId: string, prisma: PrismaClient) => {
   const cached = userInfoForMessageCache.get(userId);
@@ -37,7 +35,7 @@ const getUserInfoForDm = async (userId: string, prisma: PrismaClient) => {
   return userInfo;
 };
 
-export const socketController = (server: HttpServer, prisma: PrismaClient) => {
+export const socketController = (server: HttpServer) => {
   const io = new Server(server, {
     cors: {
       origin: ["http://localhost:5173"]

@@ -1,10 +1,10 @@
 import { Prisma } from "../generated/prisma/index.js";
 import type { Express } from "express";
 import * as z from "zod";
-import type { PrismaClientType } from "../types/prisma.js";
 import { createSession, hashed } from "../lib/session.js";
 import { SESSION_TOKEN_COOKIE } from "../lib/shared.js";
 import { getRandomAvatarColor } from "../lib/getRandomAvatarColor.js";
+import { prisma } from "../db/prisma.js";
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 20;
@@ -31,7 +31,7 @@ const VerifyUser = z.object({
   email: z.email()
 });
 
-export const usersController = (app: Express, prisma: PrismaClientType) => {
+export const usersController = (app: Express) => {
   app.get("/users", async (req, res) => {
     const parsed = GetUsersQuery.safeParse(req.query);
 
@@ -173,13 +173,11 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
     const { email } = parsed.data;
 
     try {
-      console.log("🚀 1");
       const user = await prisma.user.findUnique({
         where: {
           email
         }
       });
-      console.log("🚀 2");
 
       if (!user)
         return res

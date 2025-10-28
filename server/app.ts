@@ -1,13 +1,13 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { PrismaClient } from "./generated/prisma/index.js";
 import { usersController } from "./controllers/usersController.js";
 import { createServer } from "node:http";
 import { socketController } from "./controllers/socketController.js";
 import { sessionController } from "./controllers/sessionController.js";
 import cookieParser from "cookie-parser";
-import { initMongo } from "./mongo.js";
+import { initMongo } from "./db/mongo.js";
+import { initPrisma } from "./db/prisma.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,12 +19,12 @@ const server = createServer(app);
 app.use(express.json());
 app.use(cookieParser());
 
-const prisma = new PrismaClient();
-initMongo(process.env.MONGO_DB_URL || "");
+initPrisma();
+initMongo();
 
-usersController(app, prisma);
-sessionController(app, prisma);
-socketController(server, prisma);
+usersController(app);
+sessionController(app);
+socketController(server);
 
 server.listen(port, () => {
   console.log(`Listening on port: ${port}`);
