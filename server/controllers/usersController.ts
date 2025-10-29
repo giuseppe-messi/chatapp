@@ -189,7 +189,7 @@ export const usersController = (app: Express) => {
           .status(409)
           .json({ message: "This email does not exists! Try registering!" });
 
-      const isPasswordOk = bcrypt.compare(password, user.passwordHash);
+      const isPasswordOk = await bcrypt.compare(password, user.passwordHash);
 
       if (!isPasswordOk)
         return res.status(401).json({ message: "Invalid credentials!" });
