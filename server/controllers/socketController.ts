@@ -3,6 +3,7 @@ import type { Server as HttpServer } from "node:http";
 import type { PrismaClient } from "@prisma/client/extension";
 import { getMessages, saveMessage } from "../features/messages/messages.js";
 import { prisma } from "../db/prisma.js";
+import { allowedOrigins } from "../app.js";
 
 const dmRoomId = (userIdA: string, userIdB: string) =>
   ["dm", ...[userIdA, userIdB].sort()].join("::");
@@ -38,7 +39,8 @@ const getUserInfoForDm = async (userId: string, prisma: PrismaClient) => {
 export const socketController = (server: HttpServer) => {
   const io = new Server(server, {
     cors: {
-      origin: ["http://localhost:5173"]
+      origin: allowedOrigins,
+      credentials: true
     }
   });
 
