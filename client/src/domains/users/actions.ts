@@ -9,8 +9,11 @@ type GetUsersParams = {
   queryStr: string;
 };
 
-type SignInPayload = Pick<User, "email">;
-type SignUpPayload = Pick<User, "firstName" | "lastName" | "email">;
+type SignInPayload = Pick<User, "email" | "password">;
+type SignUpPayload = Pick<
+  User,
+  "firstName" | "lastName" | "email" | "password"
+>;
 
 const getUsers = async ({ queryStr }: GetUsersParams) => {
   const params = {
@@ -23,8 +26,8 @@ const getUsers = async ({ queryStr }: GetUsersParams) => {
   return data.items;
 };
 
-const signIn = async (email: SignInPayload) => {
-  const { data } = await api.post<User>(ROUTES.userSignin, email);
+const signIn = async (payload: SignInPayload) => {
+  const { data } = await api.post<User>(ROUTES.userSignin, payload);
   return data;
 };
 

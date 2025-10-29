@@ -17,7 +17,7 @@ export const sessionController = (app: Express) => {
         include: { user: true }
       });
 
-      if (!session) {
+      if (!session || session.expiresAt < new Date()) {
         return res.status(401).json({ message: "Unauthenticated" });
       }
 
