@@ -17,6 +17,10 @@ export type Message = {
 
 const uri = process.env.MONGO_DB_URL;
 
+console.log("🚀 ~ process.env:", process.env);
+
+console.log("🚀 ~ uri:", uri);
+
 if (!uri) {
   throw new Error("MONGO_DB_URL is not set");
 }
