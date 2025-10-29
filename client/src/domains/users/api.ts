@@ -1,9 +1,5 @@
-import axios from "axios";
-
-export const api = axios.create({
-  baseURL: "/api"
-});
-
 export const ROUTES = {
-  users: "/users"
-};
+  users: "/users",
+  userSignin: "/user/signin",
+  userSignout: "/user/signout"
+} as const;
