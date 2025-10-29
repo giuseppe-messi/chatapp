@@ -15,9 +15,15 @@ export type Message = {
   createdAt: Date;
 };
 
-const uri = process.env.MONGO_DB_URL || "";
+const uri = process.env.MONGO_DB_URL;
+
+if (!uri) {
+  throw new Error("MONGO_DB_URL is not set");
+}
+
 let db: Db | null = null;
 let messages: Collection | null = null;
+let connected = false;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -28,6 +34,8 @@ const client = new MongoClient(uri, {
 });
 
 export const initMongo = async () => {
+  if (connected) return;
+
   try {
     await client.connect();
     console.log(" You successfully connected to MongoDB!");
@@ -39,8 +47,10 @@ export const initMongo = async () => {
     await messages.createIndex({ roomId: 1, _id: 1 });
     // time queries
     await messages.createIndex({ createdAt: 1 });
+
+    connected = true;
   } catch (err) {
-    console.log("Something wrong: " + err);
+    console.log("Mongo init failed: " + err);
   }
 };
 
