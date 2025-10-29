@@ -136,7 +136,10 @@ export const usersController = (app: Express) => {
         .status(201)
         .cookie(SESSION_TOKEN_COOKIE, token, {
           httpOnly: true,
-          path: "/"
+          secure: true,
+          sameSite: "none",
+          path: "/",
+          maxAge: 1000 * 60 * 60 * 24 * 7
         })
         .json({
           ...user
@@ -200,10 +203,17 @@ export const usersController = (app: Express) => {
         .status(200)
         .cookie(SESSION_TOKEN_COOKIE, token, {
           httpOnly: true,
-          path: "/"
+          secure: true,
+          sameSite: "none",
+          path: "/",
+          maxAge: 1000 * 60 * 60 * 24 * 7
         })
         .json({
-          ...user
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          avatar: user.avatar,
+          avatarBG: user.avatarBG
         });
     } catch (err) {
       if (err) res.status(500).json({ message: "Something went wrong!" });
