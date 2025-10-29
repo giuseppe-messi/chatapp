@@ -30,8 +30,8 @@ app.use(
   })
 );
 
-initPrisma();
-initMongo();
+await initPrisma();
+await initMongo();
 
 usersController(app);
 sessionController(app);
