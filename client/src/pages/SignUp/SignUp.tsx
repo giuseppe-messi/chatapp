@@ -23,7 +23,8 @@ export const SignUp = () => {
     const formData = {
       firstName: String(fd.get("firstName")),
       lastName: String(fd.get("lastName")),
-      email: String(fd.get("email"))
+      email: String(fd.get("email")),
+      password: String(fd.get("password"))
     };
 
     mutation.mutate(formData, {
@@ -119,7 +120,7 @@ export const SignUp = () => {
               />
             </div>
           </div>
-          {/* <div>
+          <div>
             <div className="flex items-center justify-between">
               <label
                 htmlFor="password"
@@ -135,10 +136,11 @@ export const SignUp = () => {
                 name="password"
                 required
                 autoComplete="current-password"
+                minLength={8}
                 className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
               />
             </div>
-          </div> */}
+          </div>
 
           <div>
             <button

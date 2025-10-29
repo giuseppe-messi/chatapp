@@ -1,15 +1,11 @@
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import { PrismaClient } from "./generated/prisma/index.js";
 import { usersController } from "./controllers/usersController.js";
 import { createServer } from "node:http";
 import { socketController } from "./controllers/socketController.js";
 import { sessionController } from "./controllers/sessionController.js";
 import cookieParser from "cookie-parser";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { initMongo } from "./db/mongo.js";
+import { initPrisma } from "./db/prisma.js";
 
 const port = process.env.PORT || "3000";
 
@@ -18,11 +14,12 @@ const server = createServer(app);
 app.use(express.json());
 app.use(cookieParser());
 
-const prisma = new PrismaClient();
+initPrisma();
+initMongo();
 
-usersController(app, prisma);
-sessionController(app, prisma);
-// socketController(server);
+usersController(app);
+sessionController(app);
+socketController(server);
 
 server.listen(port, () => {
   console.log(`Listening on port: ${port}`);

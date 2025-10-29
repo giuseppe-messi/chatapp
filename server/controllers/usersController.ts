@@ -1,10 +1,11 @@
 import { Prisma } from "../generated/prisma/index.js";
 import type { Express } from "express";
 import * as z from "zod";
-import type { PrismaClientType } from "../types/prisma.js";
 import { createSession, hashed } from "../lib/session.js";
 import { SESSION_TOKEN_COOKIE } from "../lib/shared.js";
 import { getRandomAvatarColor } from "../lib/getRandomAvatarColor.js";
+import { prisma } from "../db/prisma.js";
+import bcrypt from "bcrypt";
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 20;
@@ -21,17 +22,19 @@ const GetUsersQuery = z.object({
   // sortBy: z.enum(['firstName'])
 });
 
-const CreateUser = z.object({
+const UserSignUp = z.object({
   firstName: z.string(),
   lastName: z.string(),
-  email: z.email()
+  email: z.email(),
+  password: z.string().min(8)
 });
 
-const VerifyUser = z.object({
-  email: z.email()
+const UserSignIn = z.object({
+  email: z.email(),
+  password: z.string().min(8)
 });
 
-export const usersController = (app: Express, prisma: PrismaClientType) => {
+export const usersController = (app: Express) => {
   app.get("/users", async (req, res) => {
     const parsed = GetUsersQuery.safeParse(req.query);
 
@@ -98,12 +101,12 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
   });
 
   app.post("/users", async (req, res) => {
-    const parsed = CreateUser.safeParse(req.body);
+    const parsed = UserSignUp.safeParse(req.body);
 
     if (!parsed.success)
       return res.status(400).json({ error: "Invalid params!" });
 
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     try {
       const doesExist = await prisma.user.findUnique({ where: { email } });
@@ -115,12 +118,14 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
 
       const avatarBG = getRandomAvatarColor() ?? "#008000c7";
       const avatar = firstName.charAt(0);
+      const passwordHash = await bcrypt.hash(password, 12);
 
       const user = await prisma.user.create({
         data: {
           firstName,
           lastName,
           email,
+          passwordHash,
           avatarBG,
           avatar
         }
@@ -165,12 +170,12 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
   });
 
   app.post("/user/signin", async (req, res) => {
-    const parsed = VerifyUser.safeParse(req.body);
+    const parsed = UserSignIn.safeParse(req.body);
 
     if (!parsed.success)
       return res.status(400).json({ message: "Invalid params!" });
 
-    const { email } = parsed.data;
+    const { email, password } = parsed.data;
 
     try {
       const user = await prisma.user.findUnique({
@@ -183,6 +188,11 @@ export const usersController = (app: Express, prisma: PrismaClientType) => {
         return res
           .status(409)
           .json({ message: "This email does not exists! Try registering!" });
+
+      const isPasswordOk = bcrypt.compare(password, user.passwordHash);
+
+      if (!isPasswordOk)
+        return res.status(401).json({ message: "Invalid credentials!" });
 
       const { token } = await createSession(user, prisma);
 

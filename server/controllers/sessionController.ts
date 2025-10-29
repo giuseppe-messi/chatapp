@@ -2,8 +2,9 @@ import type { Express } from "express";
 import type { PrismaClientType } from "../types/prisma.js";
 import { hashed } from "../lib/session.js";
 import { SESSION_TOKEN_COOKIE } from "../lib/shared.js";
+import { prisma } from "../db/prisma.js";
 
-export const sessionController = (app: Express, prisma: PrismaClientType) => {
+export const sessionController = (app: Express) => {
   app.get("/session", async (req, res) => {
     const sessionCookie = req.cookies[SESSION_TOKEN_COOKIE];
 
@@ -16,7 +17,7 @@ export const sessionController = (app: Express, prisma: PrismaClientType) => {
         include: { user: true }
       });
 
-      if (!session) {
+      if (!session || session.expiresAt < new Date()) {
         return res.status(401).json({ message: "Unauthenticated" });
       }
 

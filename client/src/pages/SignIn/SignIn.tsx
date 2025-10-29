@@ -20,7 +20,8 @@ export const SignIn = () => {
     const fd = new FormData(formRef.current);
 
     const formData = {
-      email: String(fd.get("email"))
+      email: String(fd.get("email")),
+      password: String(fd.get("password"))
     };
 
     mutation.mutate(formData, {
@@ -31,7 +32,6 @@ export const SignIn = () => {
       },
       onError: (err) => {
         let errorMessage = "Sign in failed!";
-
         if (axios.isAxiosError(err)) {
           errorMessage = err.response?.data?.message ?? errorMessage;
         }
@@ -74,6 +74,26 @@ export const SignIn = () => {
                 name="email"
                 required
                 autoComplete="email"
+                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm/6 font-medium text-gray-100"
+            >
+              Password
+            </label>
+            <div className="mt-2">
+              <input
+                id="password"
+                type="password"
+                name="password"
+                required
+                autoComplete="current-password"
+                minLength={8}
                 className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
               />
             </div>
