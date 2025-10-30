@@ -1,11 +1,10 @@
-import { Prisma } from "../generated/prisma/index.js";
-import type { Express } from "express";
 import * as z from "zod";
-import { createSession, hashed } from "../lib/session.js";
-import { SESSION_TOKEN_COOKIE } from "../lib/shared.js";
-import { getRandomAvatarColor } from "../lib/getRandomAvatarColor.js";
-import { prisma } from "../db/prisma.js";
 import bcrypt from "bcrypt";
+import { createSession, hashed, SESSION_TOKEN_COOKIE } from "../lib/session.js";
+import { getRandomAvatarColor } from "../lib/getRandomAvatarColor.js";
+import { Prisma } from "../generated/prisma/index.js";
+import { prisma } from "../db/prisma.js";
+import type { Express } from "express";
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 20;
@@ -19,7 +18,6 @@ const GetUsersQuery = z.object({
     .positive()
     .max(MAX_PAGE_SIZE)
     .default(DEFAULT_PAGE_SIZE)
-  // sortBy: z.enum(['firstName'])
 });
 
 const UserSignUp = z.object({

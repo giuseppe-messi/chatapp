@@ -1,14 +1,19 @@
-import express from "express";
-import { usersController } from "./controllers/usersController.js";
-import { createServer } from "node:http";
-import { socketController } from "./controllers/socketController.js";
-import { sessionController } from "./controllers/sessionController.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
 import { initMongo } from "./db/mongo.js";
 import { initPrisma } from "./db/prisma.js";
-import cors from "cors";
+import { sessionController } from "./controllers/sessionController.js";
+import { socketController } from "./controllers/socketController.js";
+import { usersController } from "./controllers/usersController.js";
+import { createServer } from "node:http";
 
 const port = process.env.PORT || "3000";
+
+export const allowedOrigins = [
+  "http://localhost:5173",
+  "https://chat-appi.netlify.app" // the client in pro
+];
 
 const app = express();
 const server = createServer(app);
@@ -17,11 +22,6 @@ app.use(cookieParser());
 
 // behind proxies like Render, needed for secure cookies
 app.set("trust proxy", 1);
-
-export const allowedOrigins = [
-  "http://localhost:5173",
-  "https://chat-appi.netlify.app"
-];
 
 app.use(
   cors({

@@ -1,32 +1,35 @@
 import {
-  MongoClient,
-  ServerApiVersion,
-  Db,
   Collection,
-  ObjectId
+  Db,
+  MongoClient,
+  ObjectId,
+  ServerApiVersion
 } from "mongodb";
+
+type UserDm = {
+  userId: string;
+  firstname: string;
+  avatar: string;
+  avatarBG: string;
+};
 
 export type Message = {
   _id?: ObjectId;
   room: string;
-  from: string;
-  to: string;
+  from: UserDm;
+  to: UserDm;
   text?: string;
   createdAt: Date;
 };
 
 const uri = process.env.MONGO_DB_URL;
 
-console.log("🚀 ~ process.env:", process.env);
-
-console.log("🚀 ~ uri:", uri);
-
 if (!uri) {
   throw new Error("MONGO_DB_URL is not set");
 }
 
 let db: Db | null = null;
-let messages: Collection | null = null;
+let messages: Collection<Message> | null = null;
 let connected = false;
 
 const client = new MongoClient(uri, {

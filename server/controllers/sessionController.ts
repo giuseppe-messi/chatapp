@@ -1,8 +1,6 @@
-import type { Express } from "express";
-import type { PrismaClientType } from "../types/prisma.js";
-import { hashed } from "../lib/session.js";
-import { SESSION_TOKEN_COOKIE } from "../lib/shared.js";
+import { hashed, SESSION_TOKEN_COOKIE } from "../lib/session.js";
 import { prisma } from "../db/prisma.js";
+import type { Express } from "express";
 
 export const sessionController = (app: Express) => {
   app.get("/session", async (req, res) => {
