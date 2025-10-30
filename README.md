@@ -1,7 +1,6 @@
-<h1 align="center">ChatApp</h1>
-<p align="center">
-  A full-stack real-time chat application built with <strong>React</strong>, <strong>TypeScript</strong>, and <strong>Node.js</strong>.
-</p>
+# ChatApp
+
+A full-stack real-time chat application built with **React**, **TypeScript**, and **Node.js**.
 
 ## 🚀 Overview
 
@@ -43,4 +42,8 @@ chatapp/
 ├── server/ # Node.js + Express + Prisma backend
 ```
 
-## Check it live at: [https://chat-appi.netlify.app](https://chat-appi.netlify.app)
+## ⚡ Check it live at: [https://chat-appi.netlify.app](https://chat-appi.netlify.app)
+
+> **Note:**  
+> The backend is hosted on a **free Render tier**, which may occasionally go inactive.  
+> When this happens, the first request can take **up to 50 seconds** to respond while the server spins back up.
