@@ -45,7 +45,7 @@ export const SignUp = () => {
   };
 
   return (
-    <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+    <div className="flex min-h-full flex-col justify-center px-6 py-8 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <div className="bg-[#ffe571] p-3 text-xs text-center">
           <p>
@@ -57,12 +57,12 @@ export const SignUp = () => {
             <h3>Do not use a password you use anywhere else !!!</h3>
           </strong>
         </div>
-        <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-white">
+        <h2 className="mt-5 text-center text-2xl/9 font-bold tracking-tight text-white">
           Sign up
         </h2>
       </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+      <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-sm">
         <form
           ref={formRef}
           onSubmit={onSubmit}
