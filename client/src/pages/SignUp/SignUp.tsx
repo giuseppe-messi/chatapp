@@ -1,10 +1,10 @@
-import { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useToastersStore } from "@react-lab-mono/ui";
 import axios from "axios";
-import { useAuth } from "../../contexts/AuthContext";
-import { useUserSignUpMutation } from "../../domains/users/actions";
 import { APP_ROUTES } from "../../App";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { useRef } from "react";
+import { useToastersStore } from "@react-lab-mono/ui";
+import { useUserSignUpMutation } from "../../domains/users/actions";
 
 export const SignUp = () => {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -47,11 +47,16 @@ export const SignUp = () => {
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-          alt="Your Company"
-          className="mx-auto h-10 w-auto"
-        />
+        <div className="bg-[#ffe571] p-3 text-xs text-center">
+          <p>
+            This is a small personal project. I’m applying security best
+            practices where possible, but just in case:
+          </p>
+          <br />
+          <strong>
+            <h3>Do not use a password you use anywhere else !!!</h3>
+          </strong>
+        </div>
         <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-white">
           Sign up
         </h2>
