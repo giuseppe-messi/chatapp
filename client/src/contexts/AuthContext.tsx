@@ -1,8 +1,14 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
-import type { User } from "../domains/users/types";
+import { sessionKeys } from "../domains/session/keys";
 import { useQueryClient } from "@tanstack/react-query";
 import { useQuerySession } from "../domains/session/actions";
-import { sessionKeys } from "../domains/session/keys";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  type ReactNode
+} from "react";
+import type { User } from "../domains/users/types";
 
 type AuthValue = {
   user: User | undefined;
@@ -19,17 +25,20 @@ const defaultNullishValue = {
 const AuthContext = createContext<AuthValue>(defaultNullishValue);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { user, isLoading: isLoadingUser } = useQuerySession();
+  const { data: user, isLoading: isLoadingUser } = useQuerySession();
 
   const queryClient = useQueryClient();
 
-  const setUser = (user: User) => {
-    queryClient.setQueryData(sessionKeys.key, user);
-  };
+  const setUser = useCallback(
+    (user: User) => {
+      queryClient.setQueryData(sessionKeys.key, user);
+    },
+    [queryClient]
+  );
 
   const authValue = useMemo(
     () => ({ user, isLoadingUser, setUser }),
-    [user, isLoadingUser]
+    [user, isLoadingUser, setUser]
   );
 
   return <AuthContext value={authValue}>{children}</AuthContext>;

@@ -1,9 +1,9 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { User } from "./types";
-import { ROUTES } from "./api";
 import { api } from "../../baseApi";
-import type { GetUsersApiResponse } from "../../types/api";
+import { ROUTES } from "./api";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { usersKeys } from "./keys";
+import type { User } from "./types";
+import type { GetUsersApiResponse } from "../../types/api";
 
 type GetUsersParams = {
   queryStr: string;
@@ -40,17 +40,11 @@ const signOut = async () => {
   await api.post(ROUTES.userSignout);
 };
 
-export const useUsersQuery = (props: GetUsersParams) => {
-  const query = useQuery({
-    queryKey: usersKeys.detail(props.queryStr),
-    queryFn: () => getUsers(props)
+export const useUsersQuery = ({ queryStr }: GetUsersParams) =>
+  useQuery({
+    queryKey: usersKeys.detail(queryStr),
+    queryFn: () => getUsers({ queryStr })
   });
-
-  return {
-    ...query,
-    users: query.data
-  };
-};
 
 export const useUserSignInMutation = () =>
   useMutation({

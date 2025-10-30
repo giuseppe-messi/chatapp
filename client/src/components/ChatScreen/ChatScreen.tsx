@@ -1,6 +1,6 @@
-import type { Message } from "../../store/useMessages";
-import { DirectMessagesList } from "../DirectMessagesList/DirectMessagesList";
 import { ChatInput } from "../ChatInput/ChatInput";
+import { DirectMessagesList } from "../DirectMessagesList/DirectMessagesList";
+import type { Message } from "../../store/useMessages";
 
 type ChatScreenProps = {
   messages: Message[];

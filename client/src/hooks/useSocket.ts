@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { useToastersStore } from "@react-lab-mono/ui";
 import { makeSocket } from "../socket";
+import { useAuth } from "../contexts/AuthContext";
+import { useEffect, useRef, useState } from "react";
+import { useToastersStore } from "@react-lab-mono/ui";
 import { useUsers } from "../store/useUsers";
 import { useMessages, type Message } from "../store/useMessages";
 
@@ -39,16 +39,18 @@ export const useSocket = () => {
       newSocket.disconnect();
       socketRef.current = null;
     };
-  }, [user?.id]);
+  }, [user?.id, setOnlineUsersIds]);
 
   // Join or leave the DM room when the peer changes
   useEffect(() => {
     const sockRef = socketRef.current;
     if (!sockRef || !user?.id || !peerId) return;
 
-    sockRef.emit("dm:join", peerId, (room: string, message: any) => {
+    sockRef.emit("dm:join", peerId, (room: string, messages: Message[]) => {
+      console.log("🚀 ~ messages:", messages);
+
       setRoom(room);
-      setMessages(message, room);
+      setMessages(messages, room);
     });
 
     const onMessage = (msg: Message) => setMessages(msg, msg.room);
@@ -58,19 +60,24 @@ export const useSocket = () => {
       sockRef.off("dm:message", onMessage);
       sockRef.emit("dm:leave", peerId);
     };
-  }, [user?.id, peerId]);
+  }, [user?.id, peerId, setMessages]);
 
   const sendMessage = (text: string) => {
     const sockRef = socketRef.current;
     if (!sockRef || !peerId) return;
 
-    sockRef.emit("dm:send", peerId, text, (res: any) => {
-      if (res?.ok) {
-        // here we can put logic like 'received!
-      } else {
-        enQueueToast("error", res?.error ?? "Something went wrong!");
+    sockRef.emit(
+      "dm:send",
+      peerId,
+      text,
+      (res: { ok: boolean; msg?: Message; error?: string }) => {
+        if (res?.ok) {
+          // here we can put logic like 'received!
+        } else {
+          enQueueToast("error", res?.error ?? "Something went wrong!");
+        }
       }
-    });
+    );
   };
 
   return {

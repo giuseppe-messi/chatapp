@@ -1,5 +1,5 @@
-import { useToastersStore } from "@react-lab-mono/ui";
 import { useRef } from "react";
+import { useToastersStore } from "@react-lab-mono/ui";
 
 type ChatInputProps = {
   onSend: (text: string) => void;
@@ -17,7 +17,7 @@ export const ChatInput = ({ onSend }: ChatInputProps) => {
         messageRef.current.value = "";
       }
     } catch (err) {
-      enQueueToast("error", "Error sending the message!");
+      if (err) enQueueToast("error", "Error sending the message!");
     }
   };
 
