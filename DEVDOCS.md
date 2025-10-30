@@ -13,7 +13,9 @@ It's a `Node` application.
 
 Uses `Express` framework along with `Typescript`.
 
-`prisma` as ORM and `PostgreSQL` as database.
+`Prisma` ORM and `PostgreSQL` for `users` and `sessions` tables and `MongoDB` for the `messages` collections.
+
+Real time comunication is done via `Socket.io`.
 
 ---
 
@@ -61,6 +63,21 @@ npm install
 npx prisma generate
 ```
 
-### Useful links
+---
+
+#### Useful link about authentication
 
 [auth techniques](https://apidog.com/blog/node-js-express-authentication/)
+
+---
+
+You can check about Prisma and your DB in the prisma dashboard and by running locally the studio command.
+
+Same for the messages document stored with MongoDB. Check the dashboard online and also the MongoDB Compass app locally.
+
+---
+
+### Deployed
+
+- the `/server` is hosted in Radar (check dashboard online)
+- the `/client` is hosted in Netlify (check dashboard online)
