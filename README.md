@@ -44,6 +44,6 @@ chatapp/
 
 ## ⚡Check it live!
 
-### Heads up: The app runs on free-tier hosting (Render & Netlify). It may take a few seconds to wake up after inactivity, so if it seems stuck, try refreshing the page a couple of times, everything works normally once active.
+#### Heads up: The app runs on free-tier hosting (Render & Netlify). It may take a few seconds to wake up after inactivity, so if it seems stuck, try refreshing the page a couple of times, everything works normally once active.
 
-### live link: [https://chat-appi.netlify.app](https://chat-appi.netlify.app)
+#### live link: [https://chat-appi.netlify.app](https://chat-appi.netlify.app)
