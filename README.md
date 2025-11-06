@@ -42,14 +42,8 @@ chatapp/
 ├── server/ # Node.js + Express + Prisma backend
 ```
 
-### Check it live!
+## ⚡Check it live!
 
 ### Heads up: The app runs on free-tier hosting (Render & Netlify). It may take a few seconds to wake up after inactivity, so if it seems stuck, try refreshing the page a couple of times, everything works normally once active.
 
 ### live link: [https://chat-appi.netlify.app](https://chat-appi.netlify.app)
-
----
-
-> **Note:**  
-> The backend is hosted on a **free Render tier**, which may occasionally go inactive.  
-> When this happens, the first request can take **up to 50 seconds** to respond while the server spins back up.
