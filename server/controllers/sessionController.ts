@@ -1,5 +1,5 @@
-import { hashed, SESSION_TOKEN_COOKIE } from "../lib/session.js";
-import { prisma } from "../db/prisma.js";
+import { hashed, SESSION_TOKEN_COOKIE } from '../lib/session.js';
+import { prisma } from '../db/prisma.js';
 import type { Express } from "express";
 
 export const sessionController = (app: Express) => {
@@ -21,7 +21,7 @@ export const sessionController = (app: Express) => {
 
       return res.status(200).json(session.user);
     } catch (err) {
-      if (err) res.status(500).json({ error: "Something went wrong!" });
+      if (err) return res.status(500).json({ error: "Something went wrong!" });
     }
   });
 };

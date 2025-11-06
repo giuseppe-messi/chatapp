@@ -1,15 +1,15 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { ErrorPage } from './pages/ErrorPage/ErrorPage';
+import { Layout } from './Layout';
+import { lazy, Suspense } from 'react';
+import { ProtectedRoute } from './ProtectedRoute';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   ErrorBoundary,
   LoadingSpinner,
   type FallbackProps
 } from "@react-lab-mono/ui";
-import { lazy, Suspense } from "react";
-import { Layout } from "./Layout";
-import { ErrorPage } from "./pages/ErrorPage/ErrorPage";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -24,8 +24,8 @@ const ErrorPageFallback = ({ onClearError }: FallbackProps) => (
 
 export const APP_ROUTES = {
   home: "/",
-  signin: "signin",
-  signup: "signup"
+  signin: "/signin",
+  signup: "/signup"
 };
 
 function App() {
