@@ -34,19 +34,7 @@ function App() {
       <ErrorBoundary fallback={ErrorPageFallback}>
         <AuthProvider>
           <Router>
-            <Suspense
-              fallback={
-                <>
-                  <p>
-                    The app runs on free-tier hosting (Render & Netlify). It may
-                    take a few seconds to wake up after inactivity, so if it
-                    seems stuck, try refreshing the page a couple of times,
-                    everything works normally once active.
-                  </p>
-                  <LoadingSpinner size="lg" />
-                </>
-              }
-            >
+            <Suspense fallback={<LoadingSpinner size="lg" />}>
               <Routes>
                 <Route element={<Layout />}>
                   <Route
