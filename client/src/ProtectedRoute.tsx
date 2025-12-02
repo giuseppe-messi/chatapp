@@ -33,9 +33,10 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
   if (isLoadingUser)
     return (
-      <div>
+      <>
+        <LoadingSpinner size="lg" color="white" />
         {showHeadsUp && (
-          <div className="bg-[#FFEB3B] max-w-150 mx-auto mt-8 mb-10 p-4 text-sm rounded-md">
+          <div className="bg-[#FFEB3B] max-w-150 mx-auto p-4 text-sm rounded-md">
             <p className="mb-4 font-semibold">Heads up</p>
             <p>
               The app runs on free-tier hosting (Render & Netlify). It may take
@@ -45,8 +46,7 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
             </p>
           </div>
         )}
-        <LoadingSpinner size="lg" color="white" />
-      </div>
+      </>
     );
 
   if (!user)
